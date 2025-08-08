@@ -62,3 +62,56 @@ class SimEnv:
 
         else:
             print("Error: Action must be between 0 and 2.")
+
+    #Builds clues for the epistemic agents based on previous results to update beliefs.
+    def generate_epistemic_clues(self, action, reward):
+        import numpy as np
+        clues = {"discard_arms": []}
+
+        # The confidence threshold and noise level can be adjusted based on the agent's epistemic model.
+        #The confidence threshold is the minimum certainty required to discard an arm, while the noise level simulates uncertainty based on the point of view of the agent.
+        confidence_threshold = 0.7
+        noise_level = 0.2
+
+        #Evaluates if any arm can be ouright discarted
+        for arm in range(self.n_arms):
+            if arm == action:
+                continue
+
+            # Subjective stimation of optimality
+            prob_optimal = self.reward_probs[arm]
+
+            #If there was a reward, the confidence that this arm is not optimal decreases.
+            if reward == 1:
+                confidence = max(0, 1 - prob_optimal - noise_level)
+            else:
+                # If there was no reward, the confidence that this arm is not optimal increases.
+                confidence = min(1, prob_optimal + noise_level)
+
+            # If the confidence exceeds the threshold, discard arm.
+            if confidence > confidence_threshold:
+                clues["discard_arms"].append(arm)
+
+        return clues
+
+    def edit_epistemic_parameters(self):
+        menu=input("Do you want to edit the epistemic parameters? (Y/N): ")
+        if menu.upper() == "Y" or menu.upper() == "YES":
+            import json
+            import os
+            file_path = os.path.join(os.path.dirname(__file__), "epistemic_parameters.json")
+            new_confidence_threshold = float(input("Enter new confidence threshold (0 to 1): "))
+            new_noise = float(input("Enter new noise level (0 to 1): "))
+            new_parameters = [
+                {
+                    "confidence_threshold": new_confidence_threshold,
+                    "noise": new_noise
+                }
+            ]
+            with open(file_path, 'w') as file:
+                json.dump(new_parameters, file, indent=4)
+            print("Epistemic parameters updated successfully.")
+        else:
+            print("No changes made to epistemic parameters.")
+        return
+
