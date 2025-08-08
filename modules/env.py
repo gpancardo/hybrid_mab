@@ -23,4 +23,9 @@ class SimEnv:
         #Finds optimal arm.
         self.optimal_arm = self.reward_probs.index(max(self.reward_probs))
 
+    def reset(self):
+        #Resets the environment to its initial state.
+        self.round = 0
+        self.history = []
+        return self.get_observation()
     
