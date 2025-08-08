@@ -38,3 +38,27 @@ class SimEnv:
     
     #Run round
     def step(self, action):
+        #Probability
+        if (action < 0 or action >= self.n_arms):
+            self.round+=1
+            true_prob = self.reward_probs[action]
+            effective_prob=min(max(true_prob + rd.uniform(-self.noise, self.noise), 0), 1)
+            #Calculating reward
+            if (rd.random() < effective_prob):
+                reward = 1
+            else:
+                reward = 0
+            self.history.append(
+                {
+                    "round": self.round,
+                    "action": action,
+                    "reward": reward
+                }
+            )
+            if self.epistemic_info:
+                info={"optimal_arm":self.optimal_arm}
+                info["epistemic_clue"]=self.generate_epistemic_clue(action)
+            return reward, info
+
+        else:
+            print("Error: Action must be between 0 and 2.")

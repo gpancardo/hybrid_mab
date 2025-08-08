@@ -1,0 +1,6 @@
+[
+    {
+        "confidence_threshold": 0.7,
+        "noise":0.2
+    }
+]
